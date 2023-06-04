@@ -212,7 +212,7 @@ def from_entr(
         columns = spec["columns"]
 
         try:
-            columns.remove("id") # We handle ID and Time separately
+            columns.remove("WTUR_TurNam") # We handle ID and Time separately
         except ValueError:
             pass
 
