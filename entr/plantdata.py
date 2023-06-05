@@ -107,7 +107,7 @@ def load_openoa_rpt_table(conn:EntrConnection, entr_plant_id:str, table_name:str
     column_query_fragment = ",".join([f"float(`{column.replace('_','.')}`) as {column} " for column in columns])
     column_query_fragment += ", date_time as time"
     if table_name == "scada": ## Only scada has Turbine Name column
-        column_query_fragment += ",entr_warehouse.openoa_wtg_scada.wind_turbine_name as WTUR_TurNam"
+        column_query_fragment += ",entr_warehouse.openoa_wtg_scada.wind_turbine_name as asset_id"
 
     # Filter query fragment
     filter_query_fragment = f"plant_id = {entr_plant_id}"
@@ -212,7 +212,7 @@ def from_entr(
         columns = spec["columns"]
 
         try:
-            columns.remove("WTUR_TurNam") # We handle ID and Time separately
+            columns.remove("asset_id") # We handle ID and Time separately
         except ValueError:
             pass
 
