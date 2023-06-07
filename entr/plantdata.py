@@ -71,7 +71,7 @@ def load_plant_assets(conn:EntrConnection, plant_id):
 
     asset_metadata = {
         "elevation":"elevation",
-        "id":"wind_turbine_name",
+        "asset_id":"wind_turbine_name",
         "latitude":"latitude",
         "longitude":"longitude",
         "rated_power":"rated_power",
