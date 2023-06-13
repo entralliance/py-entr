@@ -168,7 +168,8 @@ def from_entr(
     plant_name:str,
     schema:Union[str,dict]=None,
     connection:EntrConnection=None,
-    reanalysis_products:list[str]=["merra2", "era5"]
+    reanalysis_products:list[str]=["merra2", "era5"],
+    db_schema='entr_warehouse'
 )->PlantData:
     """
     from_entr
@@ -193,7 +194,7 @@ def from_entr(
     tic = perf_counter()
 
     # Get plant level metadata, including the plant_id, from the plant name string.
-    plant_metadata = load_plant_metadata(connection, plant_name, schema)
+    plant_metadata = load_plant_metadata(connection, plant_name, db_schema)
     plant_id = plant_metadata.get("_entr_plant_id") or plant_metadata["_ENTR_PLANT_ID"]
 
     # Grab schema from openoa.plant if it was provided as a string
@@ -220,10 +221,10 @@ def from_entr(
             combined_tables["reanalysis"] = {}
             combined_metadata["reanalysis"] = {}
             for reanalysis_product in reanalysis_products:
-                combined_tables["reanalysis"][reanalysis_product] = load_openoa_rpt_table(connection, plant_id, "reanalysis", spec["columns"], reanalysis=reanalysis_product, schema=schema)
+                combined_tables["reanalysis"][reanalysis_product] = load_openoa_rpt_table(connection, plant_id, "reanalysis", spec["columns"], reanalysis=reanalysis_product, schema=db_schema)
                 combined_metadata["reanalysis"][reanalysis_product] = load_openoa_rpt_table_tag_metadata(connection, plant_id, "reanalysis", spec["columns"], reanalysis=reanalysis_product)
         elif table == "asset":
-            combined_tables[table], combined_metadata[table] = load_plant_assets(connection, plant_id, schema=schema)
+            combined_tables[table], combined_metadata[table] = load_plant_assets(connection, plant_id, schema=db_schema)
         else:
             combined_metadata[table] = load_openoa_rpt_table_tag_metadata(connection, plant_id, table, spec["columns"])
             combined_tables[table] = load_openoa_rpt_table(connection, plant_id, table, spec["columns"])
