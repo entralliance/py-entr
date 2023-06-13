@@ -194,7 +194,7 @@ def from_entr(
 
     # Get plant level metadata, including the plant_id, from the plant name string.
     plant_metadata = load_plant_metadata(connection, plant_name, schema)
-    plant_id = plant_metadata["_entr_plant_id"]
+    plant_id = plant_metadata.get("_entr_plant_id") or plant_metadata["_ENTR_PLANT_ID"]
 
     # Grab schema from openoa.plant if it was provided as a string
     if type(schema) == str:
