@@ -19,12 +19,14 @@ def aep_spark_map_udf(aep_spark_map_udf_broadcast_metadata, plant_name, df):
 
     openoa_era5 = fct_pandas[(fct_pandas["table"]=="reanalysis") &\
                                (fct_pandas["reanalysis_dataset_name"]=="ERA5")]\
+                            .drop_duplicates(subset=["date_time", "entr_tag_name"], keep="first")\
                             .pivot(index="date_time", columns="entr_tag_name", values="tag_value")\
                             .reset_index()
 
     # OpenOA MERRA2 table
     openoa_merra2 = fct_pandas[(fct_pandas["table"]=="reanalysis") &\
                                (fct_pandas["reanalysis_dataset_name"]=="MERRA2")]\
+                            .drop_duplicates(subset=["date_time", "entr_tag_name"], keep="first")\
                             .pivot(index="date_time", columns="entr_tag_name", values="tag_value")\
                             .reset_index()
 
@@ -32,6 +34,7 @@ def aep_spark_map_udf(aep_spark_map_udf_broadcast_metadata, plant_name, df):
     # TODO: We are resampling the availability and curtailment values to monthly. This prevents an index error in OpenOA when these variables have different frequencies.
     openoa_curtail = fct_pandas[(fct_pandas["table"]=="plant") &\
                                (fct_pandas["entr_tag_name"].isin(["IAVL.DnWh", "IAVL.ExtPwrDnWh"]))]\
+                            .drop_duplicates(subset=["date_time", "entr_tag_name"], keep="first")\
                             .pivot(index="date_time", columns="entr_tag_name", values="tag_value")\
                             .resample("1M").sum()\
                             .reset_index()
@@ -39,6 +42,7 @@ def aep_spark_map_udf(aep_spark_map_udf_broadcast_metadata, plant_name, df):
     #penOA Meter table
     openoa_meter = fct_pandas[(fct_pandas["table"]=="plant") &\
                                (fct_pandas["entr_tag_name"].isin(["MMTR.SupWh"]))]\
+                            .drop_duplicates(subset=["date_time", "entr_tag_name"], keep="first")\
                             .pivot(index="date_time", columns="entr_tag_name", values="tag_value")\
                             .reset_index()
 
@@ -79,12 +83,12 @@ def aep_spark_map_build_metadata(conn:PySparkEntrConnection, plants:list):
         plant_meta = dim_asset_wind_plant[dim_asset_wind_plant["plant_name"]==plant]
 
         metadata_dict[plant] = {
-            "latitude": float(plant_meta.latitude),
-            "longitude": float(plant_meta.longitude),
-            "capacity": float(plant_meta.plant_capacity),
-            "number_of_turbines": int(plant_meta.number_of_turbines),
-            "turbine_capacity": float(plant_meta.turbine_capacity),
-            "_entr_plant_id": int(plant_meta.plant_id)
+            "latitude": float(plant_meta.latitude.iloc[0]),
+            "longitude": float(plant_meta.longitude.iloc[0]),
+            "capacity": float(plant_meta.plant_capacity.iloc[0]),
+            "number_of_turbines": int(plant_meta.number_of_turbines.iloc[0]),
+            "turbine_capacity": float(plant_meta.turbine_capacity.iloc[0]),
+            "_entr_plant_id": int(plant_meta.plant_id.iloc[0])
         }
 
         metadata_dict[plant]["reanalysis"] = {}
