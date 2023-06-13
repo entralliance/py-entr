@@ -16,7 +16,7 @@ import logging
 
 ## --- PLANT LEVEL METADATA ---
 
-def load_plant_metadata(conn:EntrConnection, plant_name:str) -> dict:
+def load_plant_metadata(conn:EntrConnection, plant_name:str, schema='entr_warehouse') -> dict:
     metadata_query = f"""
     SELECT
         plant_id,
@@ -27,7 +27,7 @@ def load_plant_metadata(conn:EntrConnection, plant_name:str) -> dict:
         number_of_turbines,
         turbine_capacity
     FROM
-        entr_warehouse.dim_asset_wind_plant
+        {schema}.dim_asset_wind_plant
     WHERE
         plant_name = "{plant_name}";
     """
@@ -46,7 +46,7 @@ def load_plant_metadata(conn:EntrConnection, plant_name:str) -> dict:
     }
     return metadata_dict
 
-def load_plant_assets(conn:EntrConnection, plant_id):
+def load_plant_assets(conn:EntrConnection, plant_id, schema='entr_warehouse'):
     asset_query = f"""
     SELECT
         plant_id,
@@ -61,7 +61,7 @@ def load_plant_assets(conn:EntrConnection, plant_id):
         manufacturer,
         model
     FROM
-        entr_warehouse.dim_asset_wind_turbine
+        {schema}.dim_asset_wind_turbine
     WHERE
         plant_id = {plant_id};
     """
@@ -98,7 +98,7 @@ entr_tables_dict = {
     "scada": "openoa_wtg_scada"
  }
 
-def load_openoa_rpt_table(conn:EntrConnection, entr_plant_id:str, table_name:str, columns:list[str], reanalysis=None) -> pd.DataFrame:
+def load_openoa_rpt_table(conn:EntrConnection, entr_plant_id:str, table_name:str, columns:list[str], reanalysis=None, schema='entr_warehouse') -> pd.DataFrame:
 
     # Table name query fragment
     table_query_fragment = entr_tables_dict[table_name]
@@ -107,7 +107,7 @@ def load_openoa_rpt_table(conn:EntrConnection, entr_plant_id:str, table_name:str
     column_query_fragment = ",".join([f"float(`{column.replace('_','.')}`) as {column} " for column in columns])
     column_query_fragment += ", date_time as time"
     if table_name == "scada": ## Only scada has Turbine Name column
-        column_query_fragment += ",entr_warehouse.openoa_wtg_scada.wind_turbine_name as asset_id"
+        column_query_fragment += f",{schema}.openoa_wtg_scada.wind_turbine_name as asset_id"
 
     # Filter query fragment
     filter_query_fragment = f"plant_id = {entr_plant_id}"
@@ -193,7 +193,7 @@ def from_entr(
     tic = perf_counter()
 
     # Get plant level metadata, including the plant_id, from the plant name string.
-    plant_metadata = load_plant_metadata(connection, plant_name)
+    plant_metadata = load_plant_metadata(connection, plant_name, schema)
     plant_id = plant_metadata["_entr_plant_id"]
 
     # Grab schema from openoa.plant if it was provided as a string
@@ -220,10 +220,10 @@ def from_entr(
             combined_tables["reanalysis"] = {}
             combined_metadata["reanalysis"] = {}
             for reanalysis_product in reanalysis_products:
-                combined_tables["reanalysis"][reanalysis_product] = load_openoa_rpt_table(connection, plant_id, "reanalysis", spec["columns"], reanalysis=reanalysis_product)
+                combined_tables["reanalysis"][reanalysis_product] = load_openoa_rpt_table(connection, plant_id, "reanalysis", spec["columns"], reanalysis=reanalysis_product, schema=schema)
                 combined_metadata["reanalysis"][reanalysis_product] = load_openoa_rpt_table_tag_metadata(connection, plant_id, "reanalysis", spec["columns"], reanalysis=reanalysis_product)
         elif table == "asset":
-            combined_tables[table], combined_metadata[table] = load_plant_assets(connection, plant_id)
+            combined_tables[table], combined_metadata[table] = load_plant_assets(connection, plant_id, schema=schema)
         else:
             combined_metadata[table] = load_openoa_rpt_table_tag_metadata(connection, plant_id, table, spec["columns"])
             combined_tables[table] = load_openoa_rpt_table(connection, plant_id, table, spec["columns"])
