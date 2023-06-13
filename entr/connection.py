@@ -60,3 +60,50 @@ class PyHiveEntrConnection(EntrConnection):
             :obj:`pandas.DataFrame`: Result of the query.
         """
         return pd.read_sql(query_string, self._conn)
+
+
+class SnowflakeEntrConnection(EntrConnection):
+    def __init__(
+        self,
+        sfURL,
+        sfUser,
+        sfPassword,
+        sfDatabase,
+        sfSchema,
+        sfWarehouse,
+        sfRole,
+        preactions,
+    ):
+        """ """
+
+        from pyspark.sql import SparkSession
+
+        self._sfOptions = {
+            "sfURL": sfURL,
+            "sfUser": sfUser,
+            "sfPassword": sfPassword,
+            "sfDatabase": sfDatabase,
+            "sfSchema": sfSchema,
+            "sfWarehouse": sfWarehouse,
+            "sfRole": sfRole,
+            "preactions": preactions
+            or f"USE DATABASE {sfDatabase}; USE SCHEMA {sfSchema}",
+        }
+
+        self._conn = (
+            SparkSession.builder.appName("entr_openoa_connector")
+            .config("spark.sql.execution.arrow.pyspark.enabled", "true")
+            .enableHiveSupport()
+            .getOrCreate()
+        )
+
+    def pandas_query(self, query_string: str) -> pd.DataFrame:
+        """ """
+        df = (
+            self._conn.read.format("net.snowflake.spark.snowflake")
+            .options(**self._sfOptions)
+            .option("query", query_string)
+            .load()
+        )
+
+        return df.toPandas()
