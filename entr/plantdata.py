@@ -143,7 +143,7 @@ def load_openoa_rpt_table_tag_metadata(conn:EntrConnection, plant_name:str, tabl
 
     filter_query_fragment = f"entr_tag_name in ({tag_names_sql})"
     if table_name == "reanalysis":
-        filter_query_fragment += f"AND reanalysis_dataset_name == {conn._identifier}{reanalysis.upper()}{conn._identifier}"
+        filter_query_fragment += f" AND reanalysis_dataset_name = {conn._quote}{reanalysis.upper()}{conn._quote}"
 
     # Build simple select query
     query = f"SELECT {column_query_fragment} FROM {table_query_fragment} WHERE {filter_query_fragment};"
