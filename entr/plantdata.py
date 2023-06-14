@@ -110,7 +110,7 @@ def load_openoa_rpt_table(conn:EntrConnection, entr_plant_id:str, table_name:str
     column_query_fragment = ",".join([f"float({conn._identifier}{column.replace('_','.')}{conn._identifier}) as {column} " for column in columns])
     column_query_fragment += ", date_time as time"
     if table_name == "scada": ## Only scada has Turbine Name column
-        column_query_fragment += f",{schema}.openoa_wtg_scada.wind_turbine_name as asset_id"
+        column_query_fragment += f", wind_turbine_name as asset_id"
 
     # Filter query fragment
     filter_query_fragment = f"plant_id = {conn._quote}{entr_plant_id}{conn._quote}"
