@@ -101,7 +101,7 @@ entr_tables_dict = {
     "scada": "openoa_wtg_scada"
  }
 
-def load_openoa_rpt_table(conn:EntrConnection, entr_plant_id:str, table_name:str, columns:list[str], reanalysis=None, schema='entr_warehouse') -> pd.DataFrame:
+def load_openoa_rpt_table(conn:EntrConnection, entr_plant_id:str, table_name:str, columns:list[str], reanalysis=None) -> pd.DataFrame:
 
     # Table name query fragment
     table_query_fragment = entr_tables_dict[table_name]
