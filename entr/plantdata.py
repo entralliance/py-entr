@@ -46,7 +46,7 @@ def load_plant_metadata(conn:EntrConnection, plant_name:str, schema='entr_wareho
     }
     return metadata_dict
 
-def load_plant_assets(conn:EntrConnection, plant_id, schema='entr_warehouse'):
+def load_plant_assets(conn:EntrConnection, plant_id, db_schema='entr_warehouse'):
     asset_query = f"""
     SELECT
         plant_id,
@@ -61,7 +61,7 @@ def load_plant_assets(conn:EntrConnection, plant_id, schema='entr_warehouse'):
         manufacturer,
         model
     FROM
-        {schema}.dim_asset_wind_turbine
+        {db_schema}.dim_asset_wind_turbine
     WHERE
         plant_id = {conn._quote}{plant_id}{conn._quote};
     """
@@ -232,10 +232,10 @@ def from_entr(
             combined_tables["reanalysis"] = {}
             combined_metadata["reanalysis"] = {}
             for reanalysis_product in reanalysis_products:
-                combined_tables["reanalysis"][reanalysis_product] = load_openoa_rpt_table(connection, plant_id, "reanalysis", spec["columns"], reanalysis=reanalysis_product, schema=db_schema)
+                combined_tables["reanalysis"][reanalysis_product] = load_openoa_rpt_table(connection, plant_id, "reanalysis", spec["columns"], reanalysis=reanalysis_product)
                 combined_metadata["reanalysis"][reanalysis_product] = load_openoa_rpt_table_tag_metadata(connection, plant_id, "reanalysis", spec["columns"], reanalysis=reanalysis_product)
         elif table == "asset":
-            combined_tables[table], combined_metadata[table] = load_plant_assets(connection, plant_id, schema=db_schema)
+            combined_tables[table], combined_metadata[table] = load_plant_assets(connection, plant_id, db_schema=db_schema)
         else:
             combined_metadata[table] = load_openoa_rpt_table_tag_metadata(connection, plant_id, table, spec["columns"])
             combined_tables[table] = load_openoa_rpt_table(connection, plant_id, table, spec["columns"])
