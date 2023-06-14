@@ -107,7 +107,7 @@ def load_openoa_rpt_table(conn:EntrConnection, entr_plant_id:str, table_name:str
     table_query_fragment = entr_tables_dict[table_name]
 
     # Column projection query fragment
-    column_query_fragment = ",".join([f"float({conn._identifier}{column.replace('_','.')}{conn._identifier}) as {column} " for column in columns])
+    column_query_fragment = ",".join([f"{conn._identifier}{column.replace('_','.')}{conn._identifier}::float as {column} " for column in columns])
     column_query_fragment += ", date_time as time"
     if table_name == "scada": ## Only scada has Turbine Name column
         column_query_fragment += f", wind_turbine_name as asset_id"
