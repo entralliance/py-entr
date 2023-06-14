@@ -37,12 +37,12 @@ def load_plant_metadata(conn:EntrConnection, plant_name:str, schema='entr_wareho
     assert len(metadata)>0, f"No plant matching name {plant_name}"
 
     metadata_dict = {
-        "latitude": (metadata["latitude"] or metadata["LATITUDE"])[0],
-        "longitude": (metadata["longitude"] or metadata["LONGITUDE"])[0],
-        "capacity": (metadata["plant_capacity"] or metadata["PLANT_CAPACITY"])[0],
-        "number_of_turbines": (metadata["number_of_turbines"] or metadata["NUMBER_OF_TURBINES"])[0],
-        "turbine_capacity": (metadata["turbine_capacity"] or metadata["TURBINE_CAPACITY"])[0],
-        "_entr_plant_id": (metadata["plant_id"] or metadata["PLANT_ID"])[0]
+        "latitude": (metadata.get("latitude") or metadata["LATITUDE"])[0],
+        "longitude": (metadata.get("longitude") or metadata["LONGITUDE"])[0],
+        "capacity": (metadata.get("plant_capacity") or metadata["PLANT_CAPACITY"])[0],
+        "number_of_turbines": (metadata.get("number_of_turbines") or metadata["NUMBER_OF_TURBINES"])[0],
+        "turbine_capacity": (metadata.get("turbine_capacity") or metadata["TURBINE_CAPACITY"])[0],
+        "_entr_plant_id": (metadata.get("plant_id") or metadata["PLANT_ID"])[0]
     }
     return metadata_dict
 
