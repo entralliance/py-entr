@@ -37,12 +37,12 @@ def load_plant_metadata(conn:EntrConnection, plant_name:str, schema='entr_wareho
     assert len(metadata)>0, f"No plant matching name {plant_name}"
 
     metadata_dict = {
-        "latitude": metadata["latitude"][0],
-        "longitude": metadata["longitude"][0],
-        "capacity": metadata["plant_capacity"][0],
-        "number_of_turbines": metadata["number_of_turbines"][0],
-        "turbine_capacity": metadata["turbine_capacity"][0],
-        "_entr_plant_id": metadata["plant_id"][0]
+        "latitude": (metadata["latitude"] or metadata["LATITUDE"])[0],
+        "longitude": (metadata["longitude"] or metadata["LONGITUDE"])[0],
+        "capacity": (metadata["plant_capacity"] or metadata["PLANT_CAPACITY"])[0],
+        "number_of_turbines": (metadata["number_of_turbines"] or metadata["NUMBER_OF_TURBINES"])[0],
+        "turbine_capacity": (metadata["turbine_capacity"] or metadata["TURBINE_CAPACITY"])[0],
+        "_entr_plant_id": (metadata["plant_id"] or metadata["PLANT_ID"])[0]
     }
     return metadata_dict
 
@@ -66,6 +66,9 @@ def load_plant_assets(conn:EntrConnection, plant_id, schema='entr_warehouse'):
         plant_id = {conn._quote}{plant_id}{conn._quote};
     """
     asset_df = conn.pandas_query(asset_query)
+
+    # force columns to lowercase in case returned upper
+    asset_df.columns = [col.lower() for col in asset_df.columns]
 
     asset_df["type"] = "turbine" # Only wind turbines in asset table for now.
 
@@ -140,7 +143,7 @@ def load_openoa_rpt_table_tag_metadata(conn:EntrConnection, plant_name:str, tabl
 
     filter_query_fragment = f"entr_tag_name in ({tag_names_sql})"
     if table_name == "reanalysis":
-        filter_query_fragment += f"AND reanalysis_dataset_name == \"{reanalysis.upper()}\""
+        filter_query_fragment += f"AND reanalysis_dataset_name == {conn._identifier}{reanalysis.upper()}{conn._identifier}"
 
     # Build simple select query
     query = f"SELECT {column_query_fragment} FROM {table_query_fragment} WHERE {filter_query_fragment};"
