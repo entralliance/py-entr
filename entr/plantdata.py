@@ -155,12 +155,20 @@ def load_openoa_rpt_table_tag_metadata(conn:EntrConnection, plant_name:str, tabl
     print(df)
 
     # All tags in table should be at the same time resolution
-    assert len(df["interval_s"].unique())==1, "Not all tags are at the same time resolution."
+    if "INTERVAL_S" in df.columns:
+        assert len(df["INTERVAL_S"].unique())==1, "Not all tags are at the same time resolution."
 
-    metadata = {
-        "frequency": pd.Timedelta(seconds=float(df["interval_s"][0])),
-        "time": "time"
-    }
+        metadata = {
+            "frequency": pd.Timedelta(seconds=float(df["INTERVAL_S"][0])),
+            "time": "time"
+        }
+    else:
+        assert len(df["interval_s"].unique())==1, "Not all tags are at the same time resolution."
+
+        metadata = {
+            "frequency": pd.Timedelta(seconds=float(df["interval_s"][0])),
+            "time": "time"
+        }
 
     for column in columns:
         metadata[column] = column
