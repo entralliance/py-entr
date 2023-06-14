@@ -17,6 +17,7 @@ class PySparkEntrConnection(EntrConnection):
         """
         from pyspark.sql import SparkSession
 
+        self._float_cast = "float"
         self._quote = '"'
         self._identifier = '`'
         self._conn = (
@@ -60,6 +61,7 @@ class PyHiveEntrConnection(EntrConnection):
         """
         from pyhive import hive
         
+        self._float_cast = "float"
         self._quote = '"'
         self._identifier = '`'
         self._conn = hive.Connection(host=thrift_server_host, port=thrift_server_port)
@@ -93,6 +95,7 @@ class SnowflakeEntrConnection(EntrConnection):
 
         from pyspark.sql import SparkSession
 
+        self._float_cast = "to_double"
         self._quote = "'"
         self._identifier = '"'
         self._sfOptions = {

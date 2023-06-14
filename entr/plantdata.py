@@ -52,12 +52,12 @@ def load_plant_assets(conn:EntrConnection, plant_id, schema='entr_warehouse'):
         plant_id,
         wind_turbine_id,
         wind_turbine_name,
-        float(latitude) as latitude,
-        float(longitude) as longitude,
-        float(elevation) as elevation,
-        float(hub_height) as hub_height,
-        float(rotor_diameter) as rotor_diameter,
-        float(rated_power) as rated_power,
+        {conn._float_cast}(latitude) as latitude,
+        {conn._float_cast}(longitude) as longitude,
+        {conn._float_cast}(elevation) as elevation,
+        {conn._float_cast}(hub_height) as hub_height,
+        {conn._float_cast}(rotor_diameter) as rotor_diameter,
+        {conn._float_cast}(rated_power) as rated_power,
         manufacturer,
         model
     FROM
@@ -107,7 +107,7 @@ def load_openoa_rpt_table(conn:EntrConnection, entr_plant_id:str, table_name:str
     table_query_fragment = entr_tables_dict[table_name]
 
     # Column projection query fragment
-    column_query_fragment = ",".join([f"{conn._identifier}{column.replace('_','.')}{conn._identifier}::float as {column} " for column in columns])
+    column_query_fragment = ",".join([f"{conn._float_cast}({conn._identifier}{column.replace('_','.')}{conn._identifier}) as {column} " for column in columns])
     column_query_fragment += ", date_time as time"
     if table_name == "scada": ## Only scada has Turbine Name column
         column_query_fragment += f", wind_turbine_name as asset_id"
