@@ -108,7 +108,7 @@ def load_openoa_rpt_table(conn:EntrConnection, entr_plant_id:str, table_name:str
 
     # Column projection query fragment
     column_query_fragment = ",".join([f"{conn._float_cast}({conn._identifier}{column.replace('_','.')}{conn._identifier}) as {column} " for column in columns])
-    column_query_fragment += ", date_time as time"
+    column_query_fragment += f", date_time as {conn._identifier}time{conn._identifier}"
     if table_name == "scada": ## Only scada has Turbine Name column
         column_query_fragment += f", wind_turbine_name as asset_id"
 
@@ -160,7 +160,7 @@ def load_openoa_rpt_table_tag_metadata(conn:EntrConnection, plant_name:str, tabl
 
         metadata = {
             "frequency": pd.Timedelta(seconds=float(df["INTERVAL_S"][0])),
-            "time": "TIME",
+            "time": "time",
             "asset_id": "ASSET_ID"
         }
     else:
