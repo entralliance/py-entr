@@ -29,7 +29,7 @@ def load_plant_metadata(conn:EntrConnection, plant_name:str, schema='entr_wareho
     FROM
         {schema}.dim_asset_wind_plant
     WHERE
-        plant_name = "{plant_name}";
+        plant_name = {conn._quote}{plant_name}{conn._quote};
     """
     metadata = conn.pandas_query(metadata_query)
 
@@ -63,7 +63,7 @@ def load_plant_assets(conn:EntrConnection, plant_id, schema='entr_warehouse'):
     FROM
         {schema}.dim_asset_wind_turbine
     WHERE
-        plant_id = {plant_id};
+        plant_id = {conn._quote}{plant_id}{conn._quote};
     """
     asset_df = conn.pandas_query(asset_query)
 
@@ -104,15 +104,15 @@ def load_openoa_rpt_table(conn:EntrConnection, entr_plant_id:str, table_name:str
     table_query_fragment = entr_tables_dict[table_name]
 
     # Column projection query fragment
-    column_query_fragment = ",".join([f"float(`{column.replace('_','.')}`) as {column} " for column in columns])
+    column_query_fragment = ",".join([f"float({conn._identifier}{column.replace('_','.')}{conn._identifier}) as {column} " for column in columns])
     column_query_fragment += ", date_time as time"
     if table_name == "scada": ## Only scada has Turbine Name column
         column_query_fragment += f",{schema}.openoa_wtg_scada.wind_turbine_name as asset_id"
 
     # Filter query fragment
-    filter_query_fragment = f"plant_id = {entr_plant_id}"
+    filter_query_fragment = f"plant_id = {conn._quote}{entr_plant_id}{conn._quote}"
     if table_name == "reanalysis":
-        filter_query_fragment += f" AND reanalysis_dataset_name = \"{reanalysis.upper()}\""
+        filter_query_fragment += f" AND reanalysis_dataset_name = {conn._quote}{reanalysis.upper()}{conn._quote}"
 
     # Build full query from fragments
     query = f"SELECT {column_query_fragment} FROM {table_query_fragment} WHERE {filter_query_fragment} ORDER BY time;"
