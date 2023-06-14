@@ -7,7 +7,7 @@ We recommend using the [ENTR Runtime](https://github.com/entralliance/entr_runti
 ## Features:
 
 - Python classes `entr.connector.PySparkEntrConnector` and `entr.connector.PyHiveEntrConnector` that facilitate connecting and reading data from an entr warehouse to Pandas through the `pandas_query` function.
-- An OpenOA PlantData constructur: `entr.plantdata.from_entr` constructor, which flexibly creates an OpenOA PlantData object from a query schema. *This constructor is used by openoa.plant.from_entr if both openoa and pyentr are installed.*
+- An OpenOA PlantData constructur: `entr.plantdata.from_entr` constructor, which flexibly creates an OpenOA PlantData object from a query schema. *This constructor is used by openoa.plant.PlantData.from_entr if both openoa and pyentr are installed.*
 - Pyspark user defined function (UDF) `entr.udf.aep_spark_map` which distributes the OpenOA AEP computation over a spark data warehouse using the Spark DataFrame API.
 
 ## Example Notebooks
